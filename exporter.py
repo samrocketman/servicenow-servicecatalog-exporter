@@ -188,7 +188,7 @@ class Exporter:
 
 if __name__ == '__main__':
     from docopt import docopt
-    args = docopt(__doc__, version='ServiceNow ServiceCatalog Exporter 0.1')
+    args = docopt(__doc__, version='ServiceNow ServiceCatalog Exporter 0.2')
 
     user = os.environ.get('SNOW_USER')
     password = os.environ.get('SNOW_PASS')

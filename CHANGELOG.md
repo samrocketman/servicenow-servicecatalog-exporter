@@ -1,3 +1,12 @@
+# release 0.2
+
+New features:
+
+- Limit full dump to one or more catalogs.  New option `--catalog` can be passed
+  a single catalog `sys_id` or a comma separated value list of catalog `sys_id`.
+- Limit item dump to one or more items.  `--item` option now supports a comma
+  separated value list of item `sys_id` in addition to just a single `sys_id`.
+
 # First release version 0.1
 
 Commandline option support.
