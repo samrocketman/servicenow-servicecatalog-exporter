@@ -83,15 +83,8 @@ if 'sc_cat_item_category' in export:
 # Query for variables to get question choices
 if 'item_option_new' in export:
     for item in export['item_option_new']:
-        try:
-            # Query for question choices
-            query = s.query(table='question_choice', query={'question': item['sys_id']})
-            for record in query.get_multiple():
-                if not 'question_choice' in export:
-                    export['question_choice'] = []
-                export['question_choice'].append(record)
-        except NoResults:
-            pass
+        # Query for question choices
+        export_queried_records(s, export, 'question_choice', {'question': item['sys_id']})
 
 # Query for ui catalog ui policies to get policy actions
 if 'catalog_ui_policy' in export:
