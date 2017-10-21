@@ -14,6 +14,21 @@ ServiceCatatalog and not just a single item.
 > TODO: create an importer.  So the export can be transferred to another
 > ServiceNow instance.
 
+# What is exported?
+
+In addition to catalog items, the following records related to the exported
+catalog item is also exported:
+
+- Variables (including question choices)
+- Variable sets (including associated variables, client scripts, and UI
+  policies)
+- Client scripts
+- UI policies
+- Additional categories
+- Approved by user and group
+- Available for/Not Available for lists
+- Order guide rule base
+
 # Prerequisites
 
 - Python 2.7
