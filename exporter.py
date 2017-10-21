@@ -104,7 +104,7 @@ if 'io_set_item' in export:
         try:
             query = s.query(table='item_option_new', query={'variable_set': vs['sys_id']})
             for v in query.get_multiple():
-                if not '' in export:
+                if not 'item_option_new' in export:
                     export['item_option_new'] = []
                 export['item_option_new'].append(v)
                 # Query for variable question choices
