@@ -75,4 +75,6 @@ Options:
 
 # License
 
+[MIT License](LICENSE.txt)
+
 [1]: https://www.servicenowguru.com/system-definition/exporting-service-catalog-items-step/
