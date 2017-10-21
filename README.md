@@ -58,7 +58,7 @@ producers, content items, and order guides.
 By default only the most recently created catalog item will be exported.
 
 Usage:
-  exporter.py [--full] [--instance=<instance>] [-o <file> | --output=<file>]
+  exporter.py [--full] [--catalog=<sys_id>] [--instance=<instance>] [-o <file> | --output=<file>]
   exporter.py [--item=<sys_id>] [--instance=<instance>]
   exporter.py (-h | --help)
   exporter.py --version
@@ -68,6 +68,7 @@ Options:
   --version              Show version.
   --full                 Export every ServiceCatalog catalog item.
   --item=<sys_id>        Will export a single catalog item with the matching sys_id.
+  --catalog=<sys_id>     Specify a catalog to limit --full.
   --instance=<instance>  The ServiceNow instance to export from.  Overrides the SNOW_INSTANCE environment variable.
   -o, --output=<file>    Dump the export to a file instead of stdout.
 ```
