@@ -8,11 +8,12 @@ password = os.environ.get('SNOW_PASS')
 instance = os.environ.get('SNOW_INSTANCE')
 
 
-# key name is table and value is key of that table where the associated sys_id is located
+# key name is table and value is key of that table where the associated sc_cat_item.sys_id is located in the record
 tables = {
     'item_option_new': 'cat_item',
     'catalog_script_client': 'cat_item',
     'catalog_ui_policy': 'catalog_item',
+    'io_set_item': 'sc_cat_item',
     'sc_cat_item_category': 'sc_cat_item',
     'sc_cat_item_catalog': 'sc_cat_item',
     'sc_cat_item_user_criteria_mtom': 'sc_cat_item',
@@ -50,18 +51,18 @@ for table_name, sysid_key in tables.iteritems():
                 export[table_name] = []
             export[table_name].append(record)
     except NoResults:
-        # Query yielded no results so just ignore it
+        # Query yielded no results so ignore
         pass
 
 catalogID = [] #done
 categoryID = [] #done
-vsrelID = []
-vsID = []
-vID = []
-qcID = [] #done
-uipID = []
-actID = [] #done
-csID = []
+#vsrelID = [] #done
+#vsID = [] #done
+#vID = [] #done
+#qcID = [] #done
+#uipID = [] #done
+#actID = [] #done
+#csID = [] #done
 
 # Query for Catalogs
 if 'sc_cat_item_catalog' in export:
@@ -80,9 +81,10 @@ if 'item_option_new' in export:
             # Query for question choices
             query = s.query(table='question_choice', query={'question': item['sys_id']})
             for record in query.get_multiple():
-                qcID.append(record['sys_id'])
+                if not 'question_choice' in export:
+                    export['question_choice'] = []
+                export['question_choice'].append(record)
         except NoResults:
-            # Query yielded no results so just ignore it
             pass
 
 # Query for ui catalog ui policies to get policy actions
@@ -92,11 +94,73 @@ if 'catalog_ui_policy' in export:
             # Query for ui policy actions
             query = s.query(table='catalog_ui_policy_action', query={'ui_policy': item['sys_id']})
             for record in query.get_multiple():
-                actID.append(record['sys_id'])
+                if not 'catalog_ui_policy_action' in export:
+                    export['catalog_ui_policy_action'] = []
+                export.append(record)
         except NoResults:
-            # Query yielded no results so just ignore it
             pass
 
 # Query for variable set relationships
+if 'io_set_item' in export:
+    for vsrel in export['io_set_item']:
+        vs = None
+        try:
+            # Get the variable set
+            vs = s.query(table='item_option_new_set', query={'sys_id': vsrel['variable_set']['value']})
+            if not 'item_option_new_set' in export:
+                export['item_option_new_set'] = []
+            export['item_option_new_set'].append(vs)
+        except NoResults:
+            # Query yielded no results so skip
+            continue
+
+        # Query for variables in the set
+        try:
+            query = s.query(table='item_option_new', query={'variable_set': vs['sys_id']})
+            for v in query.get_multiple():
+                if not '' in export:
+                    export['question_choice'] = []
+                export['question_choice'].append(v)
+                # Query for variable question choices
+                try:
+                    vqc_query = s.query(table='question_choice', query={'question': v['sys_id']})
+                    for record in vqc_query.get_multiple():
+                        if not 'question_choice' in export:
+                            export['question_choice'] = []
+                        export['question_choice'].append(record)
+                except NoResults:
+                    # Query yielded no results so ignore
+                    pass
+        except NoResults:
+            pass
+
+        # Query for ui policies in the set
+        try:
+            query = s.query(table='catalog_ui_policy', query={'variable_set': vs['sys_id']})
+            for uip in query.get_multiple():
+                if not 'catalog_ui_policy' in export:
+                    export['catalog_ui_policy'] = []
+                export['catalog_ui_policy'].append(uip)
+                # Query for ui policy actions
+                try:
+                    uipa_query = s.query(table='catalog_ui_policy_action', query={'ui_policy': uip['sys_id']})
+                    for record in uipa_query.get_multiple():
+                        if not 'catalog_ui_policy_action' in export:
+                            export['catalog_ui_policy_action'] = []
+                        export['catalog_ui_policy_action'].append(record)
+                except NoResults:
+                    pass
+        except NoResults:
+            pass
+
+        # Query for client scripts in the set
+        try:
+            query = s.query(table='catalog_script_client', query={'variable_set': vs['sys_id']})
+            for cs in query.get_multiple():
+                if not 'catalog_script_client' in export:
+                    export['catalog_script_client'] = []
+                export['catalog_script_client'].append(cs)
+        except NoResults:
+            pass
 
 print json.dumps(export)
