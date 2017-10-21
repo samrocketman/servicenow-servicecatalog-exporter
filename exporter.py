@@ -122,13 +122,6 @@ if 'io_set_item' in export:
                 export_queried_records(s, export, 'catalog_ui_policy_action', {'ui_policy': uip['sys_id']})
 
         # Query for client scripts in the set
-        try:
-            query = s.query(table='catalog_script_client', query={'variable_set': vs['sys_id']})
-            for cs in query.get_multiple():
-                if not 'catalog_script_client' in export:
-                    export['catalog_script_client'] = []
-                export['catalog_script_client'].append(cs)
-        except NoResults:
-            pass
+        export_queried_records(s, export, 'catalog_script_client', {'variable_set': vs['sys_id']})
 
 print json.dumps(export)
