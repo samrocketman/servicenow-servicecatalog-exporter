@@ -166,7 +166,7 @@ if 'io_set_item' in export:
 
 # Export Catalogs
 try:
-    query = s.query(table='sc_catalog', query=QueryBuilder().field('sys_id').equals(','.join(catalogID)))
+    query = s.query(table='sc_catalog', query=str('sys_idIN%s' % ','.join(catalogID)))
     for record in query.get_multiple():
         if not 'sc_catalog' in export:
             export['sc_catalog'] = []
@@ -176,7 +176,7 @@ except NoResults:
 
 # Export Categories
 try:
-    query = s.query(table='sc_category', query=QueryBuilder().field('sys_id').equals(','.join(categoryID)))
+    query = s.query(table='sc_category', query=str('sys_idIN%s' % ','.join(categoryID)))
     for record in query.get_multiple():
         if not 'sc_category' in export:
             export['sc_category'] = []
