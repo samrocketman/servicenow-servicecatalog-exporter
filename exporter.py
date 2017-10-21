@@ -1,3 +1,4 @@
+from pysnow import QueryBuilder
 from pysnow.exceptions import NoResults
 import json
 import os
@@ -162,5 +163,25 @@ if 'io_set_item' in export:
                 export['catalog_script_client'].append(cs)
         except NoResults:
             pass
+
+# Export Catalogs
+try:
+    query = s.query(table='sc_catalog', query=QueryBuilder().field('sys_id').equals(catalogID))
+    for record in query.get_multiple():
+        if not 'sc_catalog' in export:
+            export['sc_catalog'] = []
+        export['sc_catalog'].append(record)
+except NoResults:
+    pass
+
+# Export Categories
+try:
+    query = s.query(table='sc_category', query=QueryBuilder().field('sys_id').equals(categoryID))
+    for record in query.get_multiple():
+        if not 'sc_category' in export:
+            export['sc_category'] = []
+        export['sc_category'].append(record)
+except NoResults:
+    pass
 
 print json.dumps(export)
