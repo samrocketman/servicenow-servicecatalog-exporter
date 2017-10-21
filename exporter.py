@@ -60,25 +60,19 @@ export = {'sc_cat_item': [record]}
 for table_name, sysid_key in tables.iteritems():
     export_queried_records(s, export, table_name, {sysid_key: sys_id})
 
-catalogID = [] #done
-categoryID = [] #done
-#vsrelID = [] #done
-#vsID = [] #done
-#vID = [] #done
-#qcID = [] #done
-#uipID = [] #done
-#actID = [] #done
-#csID = [] #done
-
 # Query for Catalogs
+catalogID = []
 if 'sc_cat_item_catalog' in export:
     for catalog in export['sc_cat_item_catalog']:
         catalogID.append(catalog['sc_catalog']['value'])
+    export_queried_records(s, export, 'sc_catalog', str('sys_idIN%s' % ','.join(catalogID)))
 
 # Query for Categories
+categoryID = []
 if 'sc_cat_item_category' in export:
     for category in export['sc_cat_item_category']:
         categoryID.append(category['sc_category']['value'])
+    export_queried_records(s, export, 'sc_category', str('sys_idIN%s' % ','.join(categoryID)))
 
 # Query for variables to get question choices
 if 'item_option_new' in export:
@@ -161,25 +155,5 @@ if 'io_set_item' in export:
                 export['catalog_script_client'].append(cs)
         except NoResults:
             pass
-
-# Export Catalogs
-try:
-    query = s.query(table='sc_catalog', query=str('sys_idIN%s' % ','.join(catalogID)))
-    for record in query.get_multiple():
-        if not 'sc_catalog' in export:
-            export['sc_catalog'] = []
-        export['sc_catalog'].append(record)
-except NoResults:
-    pass
-
-# Export Categories
-try:
-    query = s.query(table='sc_category', query=str('sys_idIN%s' % ','.join(categoryID)))
-    for record in query.get_multiple():
-        if not 'sc_category' in export:
-            export['sc_category'] = []
-        export['sc_category'].append(record)
-except NoResults:
-    pass
 
 print json.dumps(export)
