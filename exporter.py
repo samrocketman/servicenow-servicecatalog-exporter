@@ -14,6 +14,15 @@ def export_record(export, table, record):
         export[table] = []
     export[table].append(record)
 
+def export_record_generator(connector, export, table, query):
+    try:
+        request = connector.query(table=table, query=query)
+        for record in request.get_multiple():
+            export_record(export, table, record)
+            yield
+    except NoResults:
+        pass
+
 def export_queried_records(connector, export, table, query):
     try:
         request = connector.query(table=table, query=query)
@@ -101,24 +110,10 @@ if 'io_set_item' in export:
             continue
 
         # Query for variables in the set
-        try:
-            query = s.query(table='item_option_new', query={'variable_set': vs['sys_id']})
-            for v in query.get_multiple():
-                if not 'item_option_new' in export:
-                    export['item_option_new'] = []
-                export['item_option_new'].append(v)
-                # Query for variable question choices
-                try:
-                    vqc_query = s.query(table='question_choice', query={'question': v['sys_id']})
-                    for record in vqc_query.get_multiple():
-                        if not 'question_choice' in export:
-                            export['question_choice'] = []
-                        export['question_choice'].append(record)
-                except NoResults:
-                    # Query yielded no results so ignore
-                    pass
-        except NoResults:
-            pass
+        for v in export_record_generator(s, export, 'item_option_new', {'variable_set': vs['sys_id']}):
+            # Query for variable question choices
+            if v:
+                export_queried_records(s, export, 'question_choice', {'question': v['sys_id']})
 
         # Query for ui policies in the set
         try:
