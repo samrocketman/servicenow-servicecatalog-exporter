@@ -4,10 +4,23 @@ import json
 import os
 import pysnow
 
+
 user = os.environ.get('SNOW_USER')
 password = os.environ.get('SNOW_PASS')
 instance = os.environ.get('SNOW_INSTANCE')
 
+def export_record(export, table, record):
+    if not table in export:
+        export[table] = []
+    export[table].append(record)
+
+def export_queried_records(connector, export, table, query):
+    try:
+        request = connector.query(table=table, query=query)
+        for record in request.get_multiple():
+            export_record(export, table, record)
+    except NoResults:
+        pass
 
 # key name is table and value is key of that table where the associated sc_cat_item.sys_id is located in the record
 tables = {
@@ -45,15 +58,7 @@ export = {'sc_cat_item': [record]}
 
 # Name all the related lists (a.k.a. export related records from other tables)
 for table_name, sysid_key in tables.iteritems():
-    try:
-        query = s.query(table=table_name, query={sysid_key: sys_id})
-        for record in query.get_multiple():
-            if not table_name in export:
-                export[table_name] = []
-            export[table_name].append(record)
-    except NoResults:
-        # Query yielded no results so ignore
-        pass
+    export_queried_records(s, export, table_name, {sysid_key: sys_id})
 
 catalogID = [] #done
 categoryID = [] #done
