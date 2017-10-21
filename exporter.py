@@ -9,7 +9,7 @@ producers, content items, and order guides.
 By default only the most recently created catalog item will be exported.
 
 Usage:
-  exporter.py [--full] [--instance=<instance>] [-o <file> | --output=<file>]
+  exporter.py [--full] [--catalog=<sys_id>] [--instance=<instance>] [-o <file> | --output=<file>]
   exporter.py [--item=<sys_id>] [--instance=<instance>]
   exporter.py (-h | --help)
   exporter.py --version
@@ -19,6 +19,7 @@ Options:
   --version              Show version.
   --full                 Export every ServiceCatalog catalog item.
   --item=<sys_id>        Will export a single catalog item with the matching sys_id.
+  --catalog=<sys_id>     Specify a catalog to limit --full.
   --instance=<instance>  The ServiceNow instance to export from.  Overrides the SNOW_INSTANCE environment variable.
   -o, --output=<file>    Dump the export to a file instead of stdout.
 """
@@ -198,15 +199,19 @@ if __name__ == '__main__':
     exporter = Exporter(s, export)
 
     if args.get('--full'):
-        request = s.query(table='sc_cat_item', query={})
+        if args.get('--catalog'):
+            query = 'sc_catalogsIN%s' % args.get('--catalog')
+        else:
+            query = {}
+        request = s.query(table='sc_cat_item', query=query)
         for record in request.get_multiple(order_by=['-created-on']):
             print >> sys.stderr, 'Exporting: %s (sys_id: %s)' % (record['name'], record['sys_id'])
             exporter.retrieve_full_record(record)
     elif args.get('--item'):
-        request = s.query(table='sc_cat_item', query={'sys_id': args.get('--item')})
-        record = request.get_multiple(order_by=['-created-on']).next()
-        print >> sys.stderr, 'Exporting by sys_id: %s (sys_id: %s)' % (record['name'], record['sys_id'])
-        exporter.retrieve_full_record(record)
+        request = s.query(table='sc_cat_item', query='sys_idIN%s' %args.get('--item'))
+        for record in request.get_multiple(order_by=['-created-on']):
+            print >> sys.stderr, 'Exporting by sys_id: %s (sys_id: %s)' % (record['name'], record['sys_id'])
+            exporter.retrieve_full_record(record)
     else:
         request = s.query(table='sc_cat_item', query={})
         record = request.get_multiple(order_by=['-created-on']).next()
