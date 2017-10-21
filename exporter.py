@@ -5,13 +5,18 @@ import os
 import pysnow
 
 class Exporter:
+
+
     def __init__(self, snow, export):
         self.export = export
         self.snow = snow
+
+
     def export_record(self, table, record):
         if not table in export:
             export[table] = []
         export[table].append(record)
+
 
     def export_record_generator(self, table, query):
         try:
@@ -22,6 +27,7 @@ class Exporter:
         except NoResults:
             pass
 
+
     def export_queried_records(self, table, query):
         try:
             request = self.snow.query(table=table, query=query)
@@ -29,6 +35,7 @@ class Exporter:
                 self.export_record(table, record)
         except NoResults:
             pass
+
 
     def retrieve_full_record(self, record):
         # key name is table and value is key of that table where the associated sc_cat_item.sys_id is located in the record
@@ -97,9 +104,7 @@ class Exporter:
                 try:
                     # Get the variable set
                     vs = self.snow.query(table='item_option_new_set', query={'sys_id': vsrel['variable_set']['value']}).get_one()
-                    if not 'item_option_new_set' in export:
-                        export['item_option_new_set'] = []
-                    export['item_option_new_set'].append(vs)
+                    self.export_record('item_option_new_set', vs)
                 except NoResults:
                     # Query yielded no results so skip
                     continue
