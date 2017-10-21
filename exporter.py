@@ -5,29 +5,32 @@ import os
 import pysnow
 
 class Exporter:
-    def export_record(self, export, table, record):
+    def __init__(self, snow, export):
+        self.export = export
+        self.snow = snow
+    def export_record(self, table, record):
         if not table in export:
             export[table] = []
         export[table].append(record)
 
-    def export_record_generator(self, connector, export, table, query):
+    def export_record_generator(self, table, query):
         try:
-            request = connector.query(table=table, query=query)
+            request = self.snow.query(table=table, query=query)
             for record in request.get_multiple():
-                export_record(export, table, record)
+                self.export_record(table, record)
                 yield
         except NoResults:
             pass
 
-    def export_queried_records(self, connector, export, table, query):
+    def export_queried_records(self, table, query):
         try:
-            request = connector.query(table=table, query=query)
+            request = self.snow.query(table=table, query=query)
             for record in request.get_multiple():
-                export_record(export, table, record)
+                self.export_record(table, record)
         except NoResults:
             pass
 
-    def retrieve_full_record(self, s, export, record):
+    def retrieve_full_record(self, record):
         # key name is table and value is key of that table where the associated sc_cat_item.sys_id is located in the record
         tables = {
             'item_option_new': 'cat_item',
@@ -54,38 +57,38 @@ class Exporter:
             'pc_vendor_cat_item': 'product_catalog_item'
         }
 
-        export_record(export, 'sc_cat_item', record)
+        self.export_record('sc_cat_item', record)
         sys_id = record['sys_id']
 
         # Name all the related lists (a.k.a. export related records from other tables)
         for table_name, sysid_key in tables.iteritems():
-            export_queried_records(s, export, table_name, {sysid_key: sys_id})
+            self.export_queried_records(table_name, {sysid_key: sys_id})
 
         # Query for Catalogs
         catalogID = []
         if 'sc_cat_item_catalog' in export:
             for catalog in export['sc_cat_item_catalog']:
                 catalogID.append(catalog['sc_catalog']['value'])
-            export_queried_records(s, export, 'sc_catalog', str('sys_idIN%s' % ','.join(catalogID)))
+            self.export_queried_records('sc_catalog', str('sys_idIN%s' % ','.join(catalogID)))
 
         # Query for Categories
         categoryID = []
         if 'sc_cat_item_category' in export:
             for category in export['sc_cat_item_category']:
                 categoryID.append(category['sc_category']['value'])
-            export_queried_records(s, export, 'sc_category', str('sys_idIN%s' % ','.join(categoryID)))
+            self.export_queried_records('sc_category', str('sys_idIN%s' % ','.join(categoryID)))
 
         # Query for variables to get question choices
         if 'item_option_new' in export:
             for item in export['item_option_new']:
                 # Query for question choices
-                export_queried_records(s, export, 'question_choice', {'question': item['sys_id']})
+                self.export_queried_records('question_choice', {'question': item['sys_id']})
 
         # Query for ui catalog ui policies to get policy actions
         if 'catalog_ui_policy' in export:
             for catpol in export['catalog_ui_policy']:
                 # Query for ui policy actions
-                export_queried_records(s, export, 'catalog_ui_policy_action', {'ui_policy': item['sys_id']})
+                self.export_queried_records('catalog_ui_policy_action', {'ui_policy': item['sys_id']})
 
         # Query for variable set relationships
         if 'io_set_item' in export:
@@ -93,7 +96,7 @@ class Exporter:
                 vs = None
                 try:
                     # Get the variable set
-                    vs = s.query(table='item_option_new_set', query={'sys_id': vsrel['variable_set']['value']}).get_one()
+                    vs = self.snow.query(table='item_option_new_set', query={'sys_id': vsrel['variable_set']['value']}).get_one()
                     if not 'item_option_new_set' in export:
                         export['item_option_new_set'] = []
                     export['item_option_new_set'].append(vs)
@@ -102,19 +105,19 @@ class Exporter:
                     continue
 
                 # Query for variables in the set
-                for v in export_record_generator(s, export, 'item_option_new', {'variable_set': vs['sys_id']}):
+                for v in self.export_record_generator('item_option_new', {'variable_set': vs['sys_id']}):
                     # Query for variable question choices
                     if v:
-                        export_queried_records(s, export, 'question_choice', {'question': v['sys_id']})
+                        self.export_queried_records('question_choice', {'question': v['sys_id']})
 
                 # Query for ui policies in the set
-                for uip in export_record_generator(s, export, 'catalog_ui_policy', {'variable_set': vs['sys_id']}):
+                for uip in self.export_record_generator('catalog_ui_policy', {'variable_set': vs['sys_id']}):
                     # Query for ui policy actions
                     if uip:
-                        export_queried_records(s, export, 'catalog_ui_policy_action', {'ui_policy': uip['sys_id']})
+                        self.export_queried_records('catalog_ui_policy_action', {'ui_policy': uip['sys_id']})
 
                 # Query for client scripts in the set
-                export_queried_records(s, export, 'catalog_script_client', {'variable_set': vs['sys_id']})
+                self.export_queried_records('catalog_script_client', {'variable_set': vs['sys_id']})
 
 if __name__ == "__main__":
     user = os.environ.get('SNOW_USER')
@@ -124,8 +127,9 @@ if __name__ == "__main__":
     request = s.query(table='sc_cat_item', query={})
     export = {}
 
+    exporter = Exporter(s, export)
     # export only one item (for testing purposes)
     record = request.get_multiple(order_by=['-created-on']).next()
-    retrieve_full_record(s, export, record)
+    exporter.retrieve_full_record(record)
 
     print json.dumps(export)
