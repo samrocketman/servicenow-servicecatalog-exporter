@@ -33,7 +33,7 @@ import sys
 class Exporter:
 
 
-    def __init__(self, snow, export):
+    def __init__(self, snow, export, lock=None):
         """
         Instantiates a new exporter with a servicenow client from psnow.Client and an export dictionary to append entries.
         """
@@ -50,10 +50,10 @@ class Exporter:
         Export a unique record based on sys_id to a table key.  This will append to the list of records for that table to be exported.
         """
         if not table in export:
-            export[table] = []
+            self.export[table] = []
         # only add unique records based on sys_id
-        if not bool([r for r in export[table] if r.get('sys_id', '') == record['sys_id']]):
-            export[table].append(record)
+        if not bool([r for r in self.export[table] if r.get('sys_id', '') == record['sys_id']]):
+            self.export[table].append(record)
 
 
     def export_record_generator(self, table, query):
@@ -134,32 +134,32 @@ class Exporter:
         # Query for Catalogs
         catalogID = []
         if 'sc_cat_item_catalog' in export:
-            for catalog in export['sc_cat_item_catalog']:
+            for catalog in self.export['sc_cat_item_catalog']:
                 catalogID.append(catalog['sc_catalog']['value'])
             self.export_queried_records('sc_catalog', str('sys_idIN%s' % ','.join(catalogID)))
 
         # Query for Categories
         categoryID = []
         if 'sc_cat_item_category' in export:
-            for category in export['sc_cat_item_category']:
+            for category in self.export['sc_cat_item_category']:
                 categoryID.append(category['sc_category']['value'])
             self.export_queried_records('sc_category', str('sys_idIN%s' % ','.join(categoryID)))
 
         # Query for variables to get question choices
         if 'item_option_new' in export:
-            for item in export['item_option_new']:
+            for item in self.export['item_option_new']:
                 # Query for question choices
                 self.export_queried_records('question_choice', {'question': item['sys_id']})
 
         # Query for ui catalog ui policies to get policy actions
         if 'catalog_ui_policy' in export:
-            for catpol in export['catalog_ui_policy']:
+            for catpol in self.export['catalog_ui_policy']:
                 # Query for ui policy actions
                 self.export_queried_records('catalog_ui_policy_action', {'ui_policy': item['sys_id']})
 
         # Query for variable set relationships
         if 'io_set_item' in export:
-            for vsrel in export['io_set_item']:
+            for vsrel in self.export['io_set_item']:
                 vs = None
                 try:
                     # Get the variable set
