@@ -1,3 +1,9 @@
+# Next release
+
+New features:
+
+- New option `--pretty` which, when enabled, outputs JSON pretty formatted.
+
 # release 0.2
 
 New features:
