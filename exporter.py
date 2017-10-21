@@ -83,15 +83,8 @@ if 'item_option_new' in export:
 # Query for ui catalog ui policies to get policy actions
 if 'catalog_ui_policy' in export:
     for catpol in export['catalog_ui_policy']:
-        try:
-            # Query for ui policy actions
-            query = s.query(table='catalog_ui_policy_action', query={'ui_policy': item['sys_id']})
-            for record in query.get_multiple():
-                if not 'catalog_ui_policy_action' in export:
-                    export['catalog_ui_policy_action'] = []
-                export.append(record)
-        except NoResults:
-            pass
+        # Query for ui policy actions
+        export_queried_records(s, export, 'catalog_ui_policy_action', {'ui_policy': item['sys_id']})
 
 # Query for variable set relationships
 if 'io_set_item' in export:
