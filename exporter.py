@@ -68,12 +68,12 @@ categoryID = [] #done
 # Query for Catalogs
 if 'sc_cat_item_catalog' in export:
     for catalog in export['sc_cat_item_catalog']:
-        catalogID.append(catalog['sc_catalog']['sys_id'])
+        catalogID.append(catalog['sc_catalog']['value'])
 
 # Query for Categories
 if 'sc_cat_item_category' in export:
     for category in export['sc_cat_item_category']:
-        categoryID.append(category['sc_category']['sys_id'])
+        categoryID.append(category['sc_category']['value'])
 
 # Query for variables to get question choices
 if 'item_option_new' in export:
@@ -107,7 +107,7 @@ if 'io_set_item' in export:
         vs = None
         try:
             # Get the variable set
-            vs = s.query(table='item_option_new_set', query={'sys_id': vsrel['variable_set']['value']})
+            vs = s.query(table='item_option_new_set', query={'sys_id': vsrel['variable_set']['value']}).get_one()
             if not 'item_option_new_set' in export:
                 export['item_option_new_set'] = []
             export['item_option_new_set'].append(vs)
@@ -166,7 +166,7 @@ if 'io_set_item' in export:
 
 # Export Catalogs
 try:
-    query = s.query(table='sc_catalog', query=QueryBuilder().field('sys_id').equals(catalogID))
+    query = s.query(table='sc_catalog', query=QueryBuilder().field('sys_id').equals(','.join(catalogID)))
     for record in query.get_multiple():
         if not 'sc_catalog' in export:
             export['sc_catalog'] = []
@@ -176,7 +176,7 @@ except NoResults:
 
 # Export Categories
 try:
-    query = s.query(table='sc_category', query=QueryBuilder().field('sys_id').equals(categoryID))
+    query = s.query(table='sc_category', query=QueryBuilder().field('sys_id').equals(','.join(categoryID)))
     for record in query.get_multiple():
         if not 'sc_category' in export:
             export['sc_category'] = []
