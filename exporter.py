@@ -3,22 +3,38 @@ from pysnow.exceptions import NoResults
 import json
 import os
 import pysnow
+import sys
 
 class Exporter:
 
 
     def __init__(self, snow, export):
-        self.export = export
+        """
+        Instantiates a new exporter with a servicenow client from psnow.Client and an export dictionary to append entries.
+        """
+        if not isinstance(snow, pysnow.Client):
+            raise TypeError('snow must be an instance of %s' % pysnow.Client)
+        if not isinstance(export, dict):
+            raise TypeError('export must be an instance of %s' % dict)
         self.snow = snow
+        self.export = export
 
 
     def export_record(self, table, record):
+        """
+        Export a unique record based on sys_id to a table key.  This will append to the list of records for that table to be exported.
+        """
         if not table in export:
             export[table] = []
-        export[table].append(record)
+        # only add unique records based on sys_id
+        if not bool([r for r in export[table] if r.get('sys_id', '') == record['sys_id']]):
+            export[table].append(record)
 
 
     def export_record_generator(self, table, query):
+        """
+        Similar to export_queried_records() but also offers a generator (similar to an iterator) to process each record.
+        """
         try:
             request = self.snow.query(table=table, query=query)
             for record in request.get_multiple():
@@ -29,6 +45,9 @@ class Exporter:
 
 
     def export_queried_records(self, table, query):
+        """
+        Queries the servicenow API and exports the matched records.
+        """
         try:
             request = self.snow.query(table=table, query=query)
             for record in request.get_multiple():
@@ -38,6 +57,22 @@ class Exporter:
 
 
     def retrieve_full_record(self, record):
+        """
+        Given a ServiceCatalog catalog item (a.k.a. sc_cat_item), this method will interate ServiceNow APIs to export the following related records.
+
+        Will be exported:
+
+        - Variables (including question choices)
+        - Variable sets (including associated variables, client scripts, and UI policies)
+        - Client scripts
+        - UI policies
+        - Additional categories
+        - Approved by user and group
+        - Available for/Not Available for lists
+        - Order guide rule base
+
+        This is based on https://www.servicenowguru.com/system-definition/exporting-service-catalog-items-step/
+        """
         # key name is table and value is key of that table where the associated sc_cat_item.sys_id is located in the record
         tables = {
             'item_option_new': 'cat_item',
@@ -124,7 +159,8 @@ class Exporter:
                 # Query for client scripts in the set
                 self.export_queried_records('catalog_script_client', {'variable_set': vs['sys_id']})
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     user = os.environ.get('SNOW_USER')
     password = os.environ.get('SNOW_PASS')
     instance = os.environ.get('SNOW_INSTANCE')
@@ -135,6 +171,7 @@ if __name__ == "__main__":
     exporter = Exporter(s, export)
     # export only one item (for testing purposes)
     record = request.get_multiple(order_by=['-created-on']).next()
-    exporter.retrieve_full_record(record)
 
+    print >> sys.stderr, 'Exporting %s' % record['name']
+    exporter.retrieve_full_record(record)
     print json.dumps(export)
