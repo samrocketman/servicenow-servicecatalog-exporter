@@ -67,9 +67,9 @@ Options:
   -h --help              Show this screen.
   --version              Show version.
   --full                 Export every ServiceCatalog catalog item.
-  --item=<sys_id>        Will export a single catalog item with the matching sys_id.
+  --item=<sys_id>        Will export a single catalog item with the matching sys_id.  Accepts a CSV.
   --catalog=<sys_id>     Specify a catalog to limit --full.
-  --instance=<instance>  The ServiceNow instance to export from.  Overrides the SNOW_INSTANCE environment variable.
+  --instance=<instance>  The ServiceNow instance to export from.  Overrides the SNOW_INSTANCE environment variable.  Accepts a CSV.
   -o, --output=<file>    Dump the export to a file instead of stdout.
 ```
 
