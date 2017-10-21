@@ -1,16 +1,26 @@
+#!/usr/bin/env python
 """ServiceNow ServiceCatalog Exporter
 
-This script will interact with the APIs of a ServiceNow instance and export all ServiceCatalog catalog items.  The exported items will include any table extending the 'sc_cat_item' `table…catalog` items, record producers, content items, and order guides.
+This script will interact with the APIs of a ServiceNow instance and export all
+ServiceCatalog catalog items.  The exported items will include any table
+extending the 'sc_cat_item' table items.  Including catalog items, record
+producers, content items, and order guides.
+
+By default only the most recently created catalog item will be exported.
 
 Usage:
-  exporter.py [--full]
-  exporter.py [--item=<sys_id>]
+  exporter.py [--full] [--instance=<instance>] [-o <file> | --output=<file>]
+  exporter.py [--item=<sys_id>] [--instance=<instance>]
+  exporter.py (-h | --help)
+  exporter.py --version
 
 Options:
-  -h --help        Show this screen.
-  --version        Show version.
-  --full           Export every ServiceCatalog catalog item.
-  --item=<sys_id>  Will export a single catalog item with the matching sys_id.
+  -h --help              Show this screen.
+  --version              Show version.
+  --full                 Export every ServiceCatalog catalog item.
+  --item=<sys_id>        Will export a single catalog item with the matching sys_id.
+  --instance=<instance>  The ServiceNow instance to export from.  Overrides the SNOW_INSTANCE environment variable.
+  -o, --output=<file>    Dump the export to a file instead of stdout.
 """
 
 from pysnow import QueryBuilder
@@ -176,17 +186,35 @@ class Exporter:
 
 
 if __name__ == '__main__':
+    from docopt import docopt
+    args = docopt(__doc__, version='ServiceNow ServiceCatalog Exporter 0.1')
+
     user = os.environ.get('SNOW_USER')
     password = os.environ.get('SNOW_PASS')
-    instance = os.environ.get('SNOW_INSTANCE')
+    instance = args.get('--instance') or os.environ.get('SNOW_INSTANCE')
     s = pysnow.Client(instance=instance, user=user, password=password)
-    request = s.query(table='sc_cat_item', query={})
     export = {}
 
     exporter = Exporter(s, export)
-    # export only one item (for testing purposes)
-    record = request.get_multiple(order_by=['-created-on']).next()
 
-    print >> sys.stderr, 'Exporting %s' % record['name']
-    exporter.retrieve_full_record(record)
-    print json.dumps(export)
+    if args.get('--full'):
+        request = s.query(table='sc_cat_item', query={})
+        for record in request.get_multiple(order_by=['-created-on']):
+            print >> sys.stderr, 'Exporting: %s (sys_id: %s)' % (record['name'], record['sys_id'])
+            exporter.retrieve_full_record(record)
+    elif args.get('--item'):
+        request = s.query(table='sc_cat_item', query={'sys_id': args.get('--item')})
+        record = request.get_multiple(order_by=['-created-on']).next()
+        print >> sys.stderr, 'Exporting by sys_id: %s (sys_id: %s)' % (record['name'], record['sys_id'])
+        exporter.retrieve_full_record(record)
+    else:
+        request = s.query(table='sc_cat_item', query={})
+        record = request.get_multiple(order_by=['-created-on']).next()
+        print >> sys.stderr, 'Exporting most recently created item: %s (sys_id: %s)' % (record['name'], record['sys_id'])
+        exporter.retrieve_full_record(record)
+
+    if args.get('--output'):
+        with open(args.get('--output'), 'w') as f:
+            json.dump(export, f)
+    else:
+        print json.dumps(export)

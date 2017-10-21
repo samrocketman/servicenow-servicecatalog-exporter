@@ -43,7 +43,35 @@ Instantiate your python environment and install prerequisite python packages.
     # set environment variables
     source env.sh
     # dump a record and all associated records
-    python export.py > dump.json
+    python export.py | python -m json.tool > dump.json
 
+# Usage
+
+```
+ServiceNow ServiceCatalog Exporter
+
+This script will interact with the APIs of a ServiceNow instance and export all
+ServiceCatalog catalog items.  The exported items will include any table
+extending the 'sc_cat_item' table items.  Including catalog items, record
+producers, content items, and order guides.
+
+By default only the most recently created catalog item will be exported.
+
+Usage:
+  exporter.py [--full] [--instance=<instance>] [-o <file> | --output=<file>]
+  exporter.py [--item=<sys_id>] [--instance=<instance>]
+  exporter.py (-h | --help)
+  exporter.py --version
+
+Options:
+  -h --help              Show this screen.
+  --version              Show version.
+  --full                 Export every ServiceCatalog catalog item.
+  --item=<sys_id>        Will export a single catalog item with the matching sys_id.
+  --instance=<instance>  The ServiceNow instance to export from.  Overrides the SNOW_INSTANCE environment variable.
+  -o, --output=<file>    Dump the export to a file instead of stdout.
+```
+
+# License
 
 [1]: https://www.servicenowguru.com/system-definition/exporting-service-catalog-items-step/
