@@ -1,6 +1,7 @@
+from pysnow.exceptions import NoResults
+import json
 import os
 import pysnow
-import json
 
 user = os.environ.get('SNOW_USER')
 password = os.environ.get('SNOW_PASS')
@@ -40,18 +41,16 @@ record = request.get_multiple(order_by=['-created-on']).next()
 sys_id = record['sys_id']
 export = {'sc_cat_item': [record]}
 
-#instantiate a list of records for each table
-for table_name, sysid_key in tables_to_export.iteritems():
-    export[table_name] = []
-
 for table_name, sysid_key in tables_to_export.iteritems():
     try:
         query = s.query(table=table_name, query={sysid_key: sys_id})
         for record in query.get_multiple():
             if record:
+                if not table_name in export:
+                    export[table_name] = []
                 export[table_name].append(record)
-    except:
-        #Query yielded no results
+    except NoResults:
+        #Query yielded no results so just ignore it
         pass
 
 #only export tables which have records to export
