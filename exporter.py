@@ -1,3 +1,18 @@
+"""ServiceNow ServiceCatalog Exporter
+
+This script will interact with the APIs of a ServiceNow instance and export all ServiceCatalog catalog items.  The exported items will include any table extending the 'sc_cat_item' `table…catalog` items, record producers, content items, and order guides.
+
+Usage:
+  exporter.py [--full]
+  exporter.py [--item=<sys_id>]
+
+Options:
+  -h --help        Show this screen.
+  --version        Show version.
+  --full           Export every ServiceCatalog catalog item.
+  --item=<sys_id>  Will export a single catalog item with the matching sys_id.
+"""
+
 from pysnow import QueryBuilder
 from pysnow.exceptions import NoResults
 import json

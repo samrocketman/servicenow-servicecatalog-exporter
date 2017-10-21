@@ -1,16 +1,18 @@
-# servicenow servicecatalog exporter
+# ServiceNow ServiceCatalog Exporter
 
-Because exporting the servicecatalog sucks without scripting.
+This script will interact with the APIs of a ServiceNow instance and export all
+ServiceCatalog catalog items.  The exported items will include any table
+extending the `sc_cat_item` `table…catalog` items, record producers, content
+items, and order guides.
 
-These set of python scripts will export a servicecatalog library from a
-servicenow instance.  The idea for the logic of this exporter came from a
-JavaScript based exporter created by [ServiceNow|Guru][1].
+The idea for the logic of this exporter came from a JavaScript based exporter
+created by [ServiceNow|Guru][1].
 
 This builds on `SN|Guru` example by being able to export all items from the
-servicecatatalog and not just a single item.
+ServiceCatatalog and not just a single item.
 
-> WARNING: this exporter is incomplete compared to the original.  This message
-> will be removed when the exporter is complete.
+> TODO: create an importer.  So the export can be transferred to another
+> ServiceNow instance.
 
 # Prerequisites
 
