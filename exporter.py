@@ -116,23 +116,10 @@ if 'io_set_item' in export:
                 export_queried_records(s, export, 'question_choice', {'question': v['sys_id']})
 
         # Query for ui policies in the set
-        try:
-            query = s.query(table='catalog_ui_policy', query={'variable_set': vs['sys_id']})
-            for uip in query.get_multiple():
-                if not 'catalog_ui_policy' in export:
-                    export['catalog_ui_policy'] = []
-                export['catalog_ui_policy'].append(uip)
-                # Query for ui policy actions
-                try:
-                    uipa_query = s.query(table='catalog_ui_policy_action', query={'ui_policy': uip['sys_id']})
-                    for record in uipa_query.get_multiple():
-                        if not 'catalog_ui_policy_action' in export:
-                            export['catalog_ui_policy_action'] = []
-                        export['catalog_ui_policy_action'].append(record)
-                except NoResults:
-                    pass
-        except NoResults:
-            pass
+        for uip in export_record_generator(s, export, 'catalog_ui_policy', {'variable_set': vs['sys_id']}):
+            # Query for ui policy actions
+            if uip:
+                export_queried_records(s, export, 'catalog_ui_policy_action', {'ui_policy': uip['sys_id']})
 
         # Query for client scripts in the set
         try:
