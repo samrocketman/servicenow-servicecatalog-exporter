@@ -8,7 +8,7 @@ producers, content items, and order guides.
 
 By default only the most recently created catalog item will be exported.
 
-Usage: exporter.py [--item=<sys_id>] [--instance=<instance>]
+Usage: exporter.py [--item=<sys_id>] [--instance=<instance>] [-o <file> | --output=<file>]
        exporter.py [--full] [--catalog=<sys_id>] [--instance=<instance>] [-o <file> | --output=<file>]
        exporter.py (-h | --help)
        exporter.py --version
