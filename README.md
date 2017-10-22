@@ -54,7 +54,7 @@ Instantiate your python environment and install prerequisite python packages.
     # set environment variables
     source env.sh
     # dump a record and all associated records
-    python exporter.py --pretty -o dump.json
+    python exporter.py -o dump.json
 
 # Import your dump to another ServiceNow instance
 
@@ -74,13 +74,13 @@ producers, content items, and order guides.
 
 By default only the most recently created catalog item will be exported.
 
-Usage:
-  exporter.py [--full] [--catalog=<sys_id>] [--instance=<instance>] [-o <file> | --output=<file>]
-  exporter.py [--item=<sys_id>] [--instance=<instance>]
-  exporter.py (-h | --help)
-  exporter.py --version
+Usage: exporter.py [--item=<sys_id>] [--instance=<instance>]
+       exporter.py [--full] [--catalog=<sys_id>] [--instance=<instance>] [-o <file> | --output=<file>]
+       exporter.py (-h | --help)
+       exporter.py --version
 
 Options:
+
   -h --help              Show this screen.
   --version              Show version.
   --full                 Export every ServiceCatalog catalog item.
@@ -88,7 +88,6 @@ Options:
   --item=<sys_id>        Will export a single catalog item with the matching sys_id.  Accepts a CSV.
   --instance=<instance>  The ServiceNow instance to export from.  Overrides the SNOW_INSTANCE environment variable.
   -o, --output=<file>    Dump the export to a file instead of stdout.
-  --pretty               Output JSON pretty formatted.
 ```
 
 ### Importer
