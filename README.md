@@ -11,9 +11,6 @@ created by [ServiceNow|Guru][1].
 This builds on `SN|Guru` example by being able to export all items from the
 ServiceCatatalog and not just a single item.
 
-> TODO: create an importer.  So the export can be transferred to another
-> ServiceNow instance.
-
 # What is exported?
 
 In addition to catalog items, the following records related to the exported
@@ -32,7 +29,6 @@ catalog item is also exported:
 # Prerequisites
 
 - Python 2.7
-- pip
 - virtualenv
 
 # Getting started
@@ -58,9 +54,15 @@ Instantiate your python environment and install prerequisite python packages.
     # set environment variables
     source env.sh
     # dump a record and all associated records
-    python export.py | python -m json.tool > dump.json
+    python exporter.py --pretty -o dump.json
+
+# Import your dump to another ServiceNow instance
+
+    python importer.py --instance yourinstance2 -i dump.json
 
 # Usage
+
+### Exporter
 
 ```
 ServiceNow ServiceCatalog Exporter
@@ -87,6 +89,26 @@ Options:
   --instance=<instance>  The ServiceNow instance to export from.  Overrides the SNOW_INSTANCE environment variable.
   -o, --output=<file>    Dump the export to a file instead of stdout.
   --pretty               Output JSON pretty formatted.
+```
+
+### Importer
+
+```
+ServiceNow ServiceCatalog Importer
+
+This script will interact with the APIs of a ServiceNow instance and import
+ServiceCatalog catalog items which were exported by exporter.py.
+
+Usage: importer.py [-i <file> | --import=<file>] [--instance=<instance>]
+       importer.py (-h | --help)
+       importer.py --version
+
+Options:
+
+  -h --help              Show this screen.
+  --version              Show version.
+  -i, --import <file>    Import a dumped JSON file from exporter.py to a ServiceNow instance.
+  --instance=<instance>  The ServiceNow instance to export from.  Overrides the SNOW_INSTANCE environment variable.
 ```
 
 # License

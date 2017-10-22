@@ -8,13 +8,13 @@ producers, content items, and order guides.
 
 By default only the most recently created catalog item will be exported.
 
-Usage:
-  exporter.py [--full] [--catalog=<sys_id>] [--instance=<instance>] [-o <file> | --output=<file>] [--pretty]
-  exporter.py [--item=<sys_id>] [--instance=<instance>] [--pretty]
-  exporter.py (-h | --help)
-  exporter.py --version
+Usage: exporter.py [--item=<sys_id>] [--instance=<instance>] [--pretty]
+       exporter.py [--full] [--catalog=<sys_id>] [--instance=<instance>] [-o <file> | --output=<file>] [--pretty]
+       exporter.py (-h | --help)
+       exporter.py --version
 
 Options:
+
   -h --help              Show this screen.
   --version              Show version.
   --full                 Export every ServiceCatalog catalog item.
@@ -25,7 +25,6 @@ Options:
   --pretty               Output JSON pretty formatted.
 """
 
-from pysnow import QueryBuilder
 from pysnow.exceptions import NoResults
 import json
 import os
@@ -37,7 +36,7 @@ class Exporter:
 
     def __init__(self, snow, export, lock=None):
         """
-        Instantiates a new exporter with a servicenow client from psnow.Client and an export dictionary to append entries.
+        Instantiates a new exporter with a servicenow client from pysnow.Client and an export dictionary to append entries.
         """
         if not isinstance(snow, pysnow.Client):
             raise TypeError('snow must be an instance of %s' % pysnow.Client)
@@ -189,7 +188,7 @@ class Exporter:
 
 if __name__ == '__main__':
     from docopt import docopt
-    args = docopt(__doc__, version='ServiceNow ServiceCatalog Exporter 0.2')
+    args = docopt(__doc__, version='ServiceNow ServiceCatalog Exporter 0.3')
 
     user = os.environ.get('SNOW_USER')
     password = os.environ.get('SNOW_PASS')

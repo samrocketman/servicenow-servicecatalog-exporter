@@ -1,8 +1,13 @@
-# Next release
+# release 0.3
+
+New utility:
+
+- Now there's an `importer.py` to import the JSON dump from `exporter.py`.
 
 New features:
 
-- New option `--pretty` which, when enabled, outputs JSON pretty formatted.
+- New option `exporter.py --pretty` which, when enabled, outputs JSON pretty
+  formatted.
 
 # release 0.2
 
