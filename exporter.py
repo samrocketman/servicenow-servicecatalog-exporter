@@ -24,6 +24,7 @@ Options:
   -o, --output=<file>    Dump the export to a file instead of stdout.
 """
 
+from pysnow import QueryBuilder
 from pysnow.exceptions import NoResults
 import json
 import os
@@ -135,8 +136,8 @@ class Exporter:
         catalogID = []
         if 'sc_cat_item_catalog' in export:
             for catalog in self.export['sc_cat_item_catalog']:
-                catalogID.append(catalog['sc_catalog']['value'])
-            self.export_queried_records('sc_catalog', str('sys_idIN%s' % ','.join(catalogID)))
+                catalogID.append(str(catalog['sc_catalog']['value']))
+            self.export_queried_records('sc_catalog', QueryBuilder().field('sys_id').equals(catalogID))
 
         # Query for Categories
         categoryID = []
