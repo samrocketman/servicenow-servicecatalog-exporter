@@ -1,3 +1,9 @@
+# Next release
+
+- Removed `exporter.py --pretty` option and made it the default.  This isn't
+  readlly a necessary option because the importer will send a compact version
+  regardless of the format of the JSON file.
+
 # release 0.3
 
 New utility:

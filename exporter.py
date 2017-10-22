@@ -8,8 +8,8 @@ producers, content items, and order guides.
 
 By default only the most recently created catalog item will be exported.
 
-Usage: exporter.py [--item=<sys_id>] [--instance=<instance>] [--pretty]
-       exporter.py [--full] [--catalog=<sys_id>] [--instance=<instance>] [-o <file> | --output=<file>] [--pretty]
+Usage: exporter.py [--item=<sys_id>] [--instance=<instance>]
+       exporter.py [--full] [--catalog=<sys_id>] [--instance=<instance>] [-o <file> | --output=<file>]
        exporter.py (-h | --help)
        exporter.py --version
 
@@ -22,7 +22,6 @@ Options:
   --item=<sys_id>        Will export a single catalog item with the matching sys_id.  Accepts a CSV.
   --instance=<instance>  The ServiceNow instance to export from.  Overrides the SNOW_INSTANCE environment variable.
   -o, --output=<file>    Dump the export to a file instead of stdout.
-  --pretty               Output JSON pretty formatted.
 """
 
 from pysnow.exceptions import NoResults
@@ -218,14 +217,10 @@ if __name__ == '__main__':
         print >> sys.stderr, 'Exporting most recently created item: %s (sys_id: %s)' % (record['name'], record['sys_id'])
         exporter.retrieve_full_record(record)
 
-    if args.get('--pretty'):
-        json_indent = 4
-    else:
-        json_indent = None
     if args.get('--output'):
         with open(args.get('--output'), 'w') as f:
-            json.dump(export, f, indent=json_indent, separators=(',', ': '), sort_keys=True)
+            json.dump(export, f, indent=4, separators=(',', ': '), sort_keys=True)
             #add trailing newline for POSIX compatibility
             f.write('\n')
     else:
-        print json.dumps(export, indent=json_indent, separators=(',', ': '), sort_keys=True)
+        print json.dumps(export, indent=4, separators=(',', ': '), sort_keys=True)
