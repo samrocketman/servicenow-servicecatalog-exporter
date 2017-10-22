@@ -143,8 +143,8 @@ class Exporter:
         categoryID = []
         if 'sc_cat_item_category' in export:
             for category in self.export['sc_cat_item_category']:
-                categoryID.append(category['sc_category']['value'])
-            self.export_queried_records('sc_category', str('sys_idIN%s' % ','.join(categoryID)))
+                categoryID.append(str(category['sc_category']['value']))
+            self.export_queried_records('sc_category', QueryBuilder().field('sys_id').equals(categoryID))
 
         # Query for variables to get question choices
         if 'item_option_new' in export:
