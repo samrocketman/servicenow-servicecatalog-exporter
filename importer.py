@@ -42,9 +42,11 @@ class Importer:
             request = s.query(table=table, query={'sys_id': record['sys_id']})
             #request.get_single()
             response = request.update(record)
+            print >> sys.stderr, 'update'
         except NoResults:
             # Record does not exist so create it
             response = self.snow.insert(table=table, payload=record)
+            print >> sys.stderr, 'create'
         return response
 
 
@@ -90,4 +92,5 @@ if __name__ == '__main__':
 
     for table, records in export.iteritems():
         print >> sys.stderr, 'Importing records to %s' % table
-        print json.dumps(importer.write_multiple_records(str(table), records), indent=4, separators=(',', ': '), sort_keys=True)
+        response = importer.write_multiple_records(str(table), records)
+        #print json.dumps(response, indent=4, separators=(',', ': '), sort_keys=True)
