@@ -230,5 +230,3 @@ if __name__ == '__main__':
             f.write('\n')
     else:
         print json.dumps(export, indent=json_indent, separators=(',', ': '), sort_keys=True)
-        #add trailing newline for POSIX compatibility
-        print ""
