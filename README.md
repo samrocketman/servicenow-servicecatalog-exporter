@@ -2,7 +2,7 @@
 
 This script will interact with the APIs of a ServiceNow instance and export all
 ServiceCatalog catalog items.  The exported items will include any table
-extending the `sc_cat_item` `table…catalog` items, record producers, content
+extending the `sc_cat_item` table... catalog items, record producers, content
 items, and order guides.
 
 The idea for the logic of this exporter came from a JavaScript based exporter
