@@ -4,7 +4,7 @@
 This script will interact with the APIs of a ServiceNow instance and import
 ServiceCatalog catalog items which were exported by exporter.py.
 
-Usage: importer.py [-i <file> | --import=<file>] [--instance=<instance>]
+Usage: importer.py [-i <file> | --import=<file>] [--instance=<instance>] [-o <file> | --output <file> ]
        importer.py (-h | --help)
        importer.py --version
 
@@ -13,6 +13,7 @@ Options:
   -h --help              Show this screen.
   --version              Show version.
   -i, --import <file>    Import a dumped JSON file from exporter.py to a ServiceNow instance.
+  -o, --output <file>    Export to and XML file the imported JSON.  This allows one to upload a bulk record update.
   --instance=<instance>  The ServiceNow instance to export from.  Overrides the SNOW_INSTANCE environment variable.
 """
 
@@ -21,6 +22,7 @@ import json
 import os
 import pysnow
 import sys
+import codecs
 
 class Importer:
 
@@ -70,18 +72,14 @@ class Importer:
 
         return response
 
+    def obj_to_xml(self, obj):
+        pass
+
 
 if __name__ == '__main__':
     from docopt import docopt
     args = docopt(__doc__, version='ServiceNow ServiceCatalog Importer 0.3')
-
-    user = os.environ.get('SNOW_USER')
-    password = os.environ.get('SNOW_PASS')
-    instance = args.get('--instance') or os.environ.get('SNOW_INSTANCE')
-    s = pysnow.Client(instance=instance, user=user, password=password)
     export = {}
-
-    importer = Importer(s)
 
     # Get the JSON dump
     if not args.get('--import'):
@@ -90,7 +88,17 @@ if __name__ == '__main__':
         with open(args.get('--import')) as f:
             export = json.load(f)
 
-    for table, records in export.iteritems():
-        print >> sys.stderr, 'Importing records to %s' % table
-        response = importer.write_multiple_records(str(table), records)
-        #print json.dumps(response, indent=4, separators=(',', ': '), sort_keys=True)
+    if args.get('--output'):
+        with codecs.open(args.get('--output'), 'w', 'utf-8') as f:
+            f.write(Importer.obj_to_xml(export).strip())
+            f.write("\n")
+    else:
+        user = os.environ.get('SNOW_USER')
+        password = os.environ.get('SNOW_PASS')
+        instance = args.get('--instance') or os.environ.get('SNOW_INSTANCE')
+        s = pysnow.Client(instance=instance, user=user, password=password)
+        importer = Importer(s)
+        for table, records in export.iteritems():
+            print >> sys.stderr, 'Importing records to %s' % table
+            response = importer.write_multiple_records(str(table), records)
+            #print json.dumps(response, indent=4, separators=(',', ': '), sort_keys=True)
