@@ -17,25 +17,29 @@ def is_dict(obj):
 
 template = """
 {% macro format_value(value) -%}
-    {% if '<' in value or '>' in value
-        %}<![CDATA[{{value}}]]>{%
-    else
-        %}{{value}}{% endif %}
+    {%- if value is mapping -%}
+        {{value['value']}}
+    {%- elif '<' in value or '>' in value -%}
+        <![CDATA[{{value}}]]>
+    {%- else -%}
+        {{value | escape}}
+    {%- endif -%}
 {%- endmacro %}
 <?xml version="1.0" encoding="UTF-8"?>
-<unload>
-    {%- for table in tables %}
-    <{{table}} action="INSERT_OR_UPDATE">
-    {%- for record in tables[table] -%} {%- for field, value in record.items() recursive %} {%- if value is mapping %}
-        <{{field}}>{{loop(value.items()) | indent(4, True)}}
-        </{{field}}>
-    {%- elif value %}
-        <{{field}}>{{format_value(value)}}</{{field}}>
-    {%- else %}
-        <{{field}} />
-    {%- endif %} {%- endfor -%} {%- endfor %}
-    </{{table}}>
-{% endfor %}</unload>
+<unload>{%- for table in tables %}
+   {%- for record in tables[table] %}
+   <{{table}} action="INSERT_OR_UPDATE">
+   {%- for field, value in record | dictsort %}
+   {%- if format_value(value) %}
+      <{{field}}>{{format_value(value)}}</{{field}}>
+   {%- else %}
+      <{{field}} />
+   {%- endif %}
+   {%- endfor %}
+   </{{table}}>
+   {%- endfor %}
+{%- endfor %}
+</unload>
 """.strip()
 """
 """
@@ -45,4 +49,4 @@ with open('dump.json') as f:
     export = json.load(f)
 
 t = Template(template)
-print t.render(processor=get_value_by_type, tables = export)
+print t.render(tables = export).strip()
